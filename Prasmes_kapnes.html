@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prasmes kāpnes</title>
+<style>
+:root{
+  --c1:#64A6BD;--c2:#90A8C3;--c3:#ADA7C9;--c4:#D7B9D5;--c5:#F4CAE0;
+  --ink:#2F3E5C;--ink2:#51607E;--bg:#F3F6FA;--card:#FFFFFF;--line:#D9E1EC;
+  --ok:#2E7D5B;--okbg:#DDF1E6;--soft:#FFF4D6;--softink:#7A5A12;
+  --hfont:Candara,"Segoe UI",Calibri,sans-serif;--bfont:Aptos,Candara,"Segoe UI",Calibri,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#E6ECF3}
+body{font-family:var(--bfont);color:var(--ink);-webkit-user-select:none;user-select:none}
+button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible{outline:4px solid var(--c1);outline-offset:3px}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{position:relative;width:1600px;height:900px;flex:none;background:var(--bg);overflow:hidden;transform-origin:center center;border-radius:14px}
+.screen{position:absolute;inset:0;display:none}
+.screen.on{display:block}
+
+/* Sākumekrāns */
+#start .bgfx{position:absolute;inset:0}
+#start .intro{position:absolute;left:96px;top:150px;width:690px;padding:46px 50px 50px;background:rgba(255,255,255,.86);border-radius:28px;box-shadow:0 18px 50px rgba(47,62,92,.12)}
+#start .ikona{width:112px;height:112px;border-radius:30px;background:linear-gradient(135deg,var(--c1),var(--c3));display:flex;align-items:center;justify-content:center;margin-bottom:26px}
+#start .ikona svg{width:68px;height:68px}
+#start .prieksmets{font-size:21px;color:var(--ink2);margin-bottom:10px;letter-spacing:.2px}
+#start h1{font-family:var(--hfont);font-size:62px;line-height:1.05;font-weight:700;margin-bottom:20px}
+#start p.ievads{font-size:27px;line-height:1.38;margin-bottom:34px}
+.btn-sakt{font-family:var(--hfont);font-size:34px;font-weight:700;padding:20px 64px;border-radius:999px;background:var(--ink);color:#fff;box-shadow:0 8px 20px rgba(47,62,92,.25)}
+.btn-sakt:hover{background:#3C4E73}
+
+/* Galvene un kājene */
+.galvene{position:absolute;left:0;right:0;top:0;height:104px;display:flex;align-items:center;padding:0 40px;gap:22px;background:#fff;border-bottom:2px solid var(--line)}
+.apli{display:flex;gap:6px}
+.apli i{display:block;width:20px;height:20px;border-radius:50%}
+.galvene .tt{flex:1;min-width:0}
+.galvene h2{font-family:var(--hfont);font-size:36px;line-height:1.1;font-weight:700}
+.galvene .rinda{font-size:18px;color:var(--ink2);margin-top:4px}
+.galvene .rk{display:flex;gap:12px;align-items:center}
+.btn{font-size:21px;font-weight:600;padding:12px 24px;border-radius:14px;background:#EEF2F8;border:2px solid var(--line)}
+.btn:hover{background:#E3E9F2}
+.btn.pr{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.pr:hover{background:#3C4E73}
+.btn.liels{font-size:28px;padding:16px 38px;border-radius:18px}
+.btn[disabled]{opacity:.4;cursor:default}
+.kajene{position:absolute;left:0;right:0;bottom:0;height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 40px;font-size:16px;color:var(--ink2);pointer-events:none}
+.kajene>*{pointer-events:auto}
+#fsBtn{font-size:18px;font-weight:600;padding:10px 20px;border-radius:12px;background:#fff;border:2px solid var(--line);color:var(--ink)}
+#fsBtn:hover{background:#EEF2F8}
+.saturs{position:absolute;left:0;right:0;top:104px;bottom:62px;padding:26px 40px 10px}
+
+.karte{background:var(--card);border-radius:22px;box-shadow:0 6px 22px rgba(47,62,92,.08);border:2px solid var(--line)}
+.zime{display:inline-block;font-size:18px;font-weight:700;padding:6px 14px;border-radius:999px;background:#EEF2F8}
+.atgriez{font-size:24px;line-height:1.4}
+.ok{color:var(--ok)}
+.gandriz{color:var(--softink)}
+.foto{display:block;object-fit:cover;border-radius:16px;background:#E8EDF4}
+.mazs{font-size:18px;color:var(--ink2)}
+
+[hidden]{display:none!important}
+.tabs{display:flex;gap:8px;margin-right:6px}
+.tab{font-size:20px;font-weight:700;padding:12px 22px;border-radius:14px;background:#EEF2F8;border:2px solid var(--line);color:var(--ink2)}
+.tab.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.beigas h3{font-family:var(--hfont);font-size:46px;margin-bottom:10px}
+@keyframes pop{0%{transform:scale(.92);opacity:0}100%{transform:scale(1);opacity:1}}
+.pop{animation:pop .28s ease-out}
+@media (prefers-reduced-motion:reduce){.pop{animation:none}}
+.kb{border-left:8px solid var(--c1);background:#EAF3F7;border-radius:0 16px 16px 0;padding:14px 20px}
+.kb .v{display:block;font-size:15px;font-weight:700;letter-spacing:.12em;color:#3E7F96;margin-bottom:4px}
+
+
+.r{display:flex;gap:26px;height:100%}
+.kreisa{flex:1;display:flex;flex-direction:column;min-width:0}
+.cipi{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.cips{font-size:19px;font-weight:700;padding:10px 18px;border-radius:999px;background:#fff;border:2px solid var(--line);color:var(--ink2)}
+.cips.on{background:var(--c1);border-color:var(--c1);color:#fff}
+.cips.gatavs:not(.on)::after{content:" ✓";color:var(--ok)}
+.kapnes{position:relative;flex:1;border-radius:22px;background:linear-gradient(180deg,#FFFFFF 0,#F1F5FA 100%);border:2px solid var(--line);overflow:hidden}
+.kapnes .virs{position:absolute;left:28px;top:20px;width:440px}
+.kapnes .virs .pm{font-size:17px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#3E7F96}
+.kapnes .virs .pn{font-family:var(--hfont);font-size:38px;font-weight:700;line-height:1.1;margin-top:4px}
+.kapnes .virs .pj{font-size:19px;color:var(--ink2);margin-top:6px}
+.pak{position:absolute;width:420px;height:78px}
+.pak .pamats{position:absolute;left:0;right:0;bottom:-12px;height:12px;border-radius:0 0 8px 8px;background:var(--c2);opacity:.55}
+.slots{position:absolute;inset:0;border-radius:14px;border:3px dashed #B9C6D8;background:rgba(255,255,255,.7);display:flex;align-items:center;gap:12px;padding:8px 14px 8px 8px;font-size:18px;line-height:1.25;cursor:pointer;text-align:left}
+.slots .nrs{flex:none;width:44px;height:44px;border-radius:12px;background:#E3EAF3;color:var(--ink2);font-weight:700;font-size:22px;display:flex;align-items:center;justify-content:center}
+.slots.piln{border-style:solid;border-color:var(--c2);background:#fff}
+.slots.piln .nrs{background:var(--c1);color:#fff}
+.slots.pareizi{border-color:var(--ok);background:var(--okbg)}
+.slots.pareizi .nrs{background:var(--ok)}
+.slots.gandriz{border-color:#E0A33A;background:var(--soft)}
+.slots.gandriz .nrs{background:#E0A33A}
+.slots .tx{flex:1;min-width:0}
+.slots .lb{display:block;font-size:14px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#3E7F96;margin-bottom:1px}
+.slots.gandriz .lb{color:#9A6A12}
+.slots.pareizi .lb{color:var(--ok)}
+.panelis{width:540px;padding:22px 24px;display:flex;flex-direction:column;gap:12px}
+.panelis h4{font-family:var(--hfont);font-size:28px}
+.panelis p.ins{font-size:19px;line-height:1.35;color:var(--ink2)}
+.kaudze{display:flex;flex-direction:column;gap:10px}
+.kart{text-align:left;font-size:19px;line-height:1.3;padding:12px 16px;border-radius:14px;background:#F6F1FA;border:2px solid #E3D6EC;min-height:62px}
+.kart:hover{background:#EFE6F6}
+.atg{font-size:21px;line-height:1.4;border-radius:16px;padding:14px 18px}
+.atg.ok{background:var(--okbg);color:var(--ok)}
+.atg.gd{background:var(--soft);color:var(--softink)}
+.panelis .kb p{font-size:19px;line-height:1.35}
+.pogas{display:flex;gap:10px;flex-wrap:wrap;margin-top:auto}
+.beigas{text-align:left}
+.modelis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin:22px 0 26px;align-items:end}
+.mst{background:#fff;border:2px solid var(--line);border-radius:18px;padding:16px;text-align:center}
+.mst b{display:block;width:52px;height:52px;margin:0 auto 10px;border-radius:14px;background:var(--c1);color:#fff;font-size:26px;line-height:52px}
+.mst span{font-size:21px;font-weight:700;line-height:1.25}
+.beigas .kb{max-width:1100px}
+.beigas .kb p{font-size:24px;line-height:1.4}
+.bpogas{display:flex;gap:14px;margin-top:26px}
+
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+<section class="screen on" id="start">
+  <div class="bgfx"></div>
+  <div class="intro">
+    <div class="ikona"><svg viewBox="0 0 64 64" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 54h12V42h12V30h12V18h12"/><circle cx="50" cy="9" r="4"/></svg></div>
+    <div class="prieksmets">Audzināšana un karjeras izglītība · 4.–6. klase</div>
+    <h1>Prasmes kāpnes</h1>
+    <p class="ievads">Klase kopā sakārto prasmes apguves soļus – no «gribu iemācīties» līdz «protu un varu iemācīt citam».</p>
+    <button class="btn-sakt" id="btnSakt" type="button">Sākt</button>
+  </div>
+</section>
+
+<section class="screen" id="darbs">
+  <header class="galvene"><div class="apli"><i style="background:#64A6BD"></i><i style="background:#90A8C3"></i><i style="background:#ADA7C9"></i><i style="background:#D7B9D5"></i><i style="background:#F4CAE0"></i></div><div class="tt"><h2>Prasmes kāpnes</h2><div class="rinda">Audzināšana un karjeras izglītība · 4.–6. klase · Manas prasmes</div></div><div class="rk"><button class="btn" type="button" id="btnBeigas">Kopsavilkums</button><button class="btn" type="button" data-uz-sakumu>Uz sākumu</button></div></header>
+  <div class="saturs">
+    <div class="r">
+      <div class="kreisa">
+        <div class="cipi" id="cipi"></div>
+        <div class="kapnes" id="kapnes">
+          <div class="virs"><div class="pm" id="pm"></div><div class="pn" id="pn"></div><div class="pj">Sakārtojiet soļus no apakšas uz augšu tādā secībā, kādā šo prasmi apgūst.</div></div>
+        </div>
+      </div>
+      <div class="karte panelis" id="panelis"></div>
+    </div>
+  </div>
+</section>
+<section class="screen" id="beigas">
+  <header class="galvene"><div class="apli"><i style="background:#64A6BD"></i><i style="background:#90A8C3"></i><i style="background:#ADA7C9"></i><i style="background:#D7B9D5"></i><i style="background:#F4CAE0"></i></div><div class="tt"><h2>Prasmes kāpnes</h2><div class="rinda">Audzināšana un karjeras izglītība · 4.–6. klase · Manas prasmes</div></div><div class="rk"><button class="btn" type="button" data-uz-sakumu>Uz sākumu</button></div></header>
+  <div class="saturs beigas">
+    <h3>Kāpnes ir vienādas visām prasmēm</h3>
+    <p class="mazs" style="font-size:22px">Lai ko mēs mācītos, piemēram, peldēt, zīmēt vai rakstīt datorā, mēs kāpjam pa tiem pašiem pakāpieniem.</p>
+    <div class="modelis" id="modelis"></div>
+    <div class="kb"><span class="v">SARUNAI KLASĒ</span><p>Uz kura pakāpiena ir prasme, ko tu šobrīd apgūsti? Kurš pakāpiens tev ir visgrūtākais – un kas palīdz uzkāpt uz nākamā?</p></div>
+    <div class="bpogas"><button class="btn pr liels" id="btnVelreiz" type="button">Sākt no jauna</button></div>
+  </div>
+</section>
+
+<div class="kajene"><span>Interaktīvo rīku sagatavoja pedagoģe karjeras konsultante Jolanta Grosberga-Gernere</span><button id="fsBtn" type="button">Atvērt pilnekrāna režīmu</button></div>
+</div></div>
+<script>const IMG = {};</script>
+<script>
+/* Lēnais «CandyShoal» fons sākumekrānam (vanilla JS pielāgojums, 4.–6. klases palete).
+   Apstājas, kad sākumekrāns paslēpts; bez WebGL2 – nekustīgs raksts; prefers-reduced-motion – nekustīgs attēls. */
+(function () {
+  "use strict";
+  var MAX = 100, LMAX = 24, SUBSTEP = 1 / 120, SPRING_K = 70, SPRING_C = 5.4;
+
+  var CFG = {
+    background: "#F3F6FA",
+    colors: ["#64A6BD", "#90A8C3", "#ADA7C9", "#D7B9D5", "#F4CAE0"],
+    count: 42, merge: 55, scale: 118, speed: 16, gather: 4, hover: 70,
+    placeX: 21,
+    deep: 74, rimLift: 118, shadowColor: "#6B7896", highlight: "#FFFFFF",
+    envColor: "#E3ECF4", fleckColor: "#FFFFFF", rimStrength: 55, glowSize: 5,
+    glowStrength: 30, specStrength: 80, windowWidth: 26, reflection: 30,
+    occlusion: 45, mixSpread: 150, sizes: [142, 92, 58, 27], fieldWidth: 34,
+    fieldHeight: 40, depth: 35, offsetY: 2, wander: 12, breathMs: 6200, clump: 40,
+    fov: 35, seed: 7, pointerRadius: 30, pointerPush: 10, resolution: 70, vignette: 0,
+    fps: 30
+  };
+
+  var VERT = "#version 300 es\nvoid main(){vec2 p=vec2(float((gl_VertexID<<1)&2),float(gl_VertexID&2));gl_Position=vec4(p*2.0-1.0,0.0,1.0);}";
+
+  var FRAG = [
+    "#version 300 es",
+    "precision highp float;precision highp int;",
+    "#define MAX_SPHERES 100",
+    "#define LMAX 24",
+    "uniform vec2 uRes;uniform vec4 uS[MAX_SPHERES];uniform vec4 uC[MAX_SPHERES];uniform int uCount;",
+    "uniform float uK;uniform float uKc;uniform float uMargin;uniform vec4 uCam;uniform float uFov;",
+    "uniform float uDeepF;uniform float uRimF;uniform vec3 uShadow;uniform vec3 uHi;uniform vec3 uEnv;",
+    "uniform vec3 uBg;uniform vec3 uFleck;uniform float uSpec;uniform float uRimAmt;uniform float uGlow;",
+    "uniform float uGlowAmt;uniform float uAO;uniform float uRefl;uniform float uWinW;uniform float uVig;",
+    "out vec4 outColor;",
+    "vec4 ls[LMAX];vec4 lc[LMAX];int ln;",
+    "float smin(float a,float b,float k){if(k<1e-5)return min(a,b);float h=max(k-abs(a-b),0.0)/k;return min(a,b)-h*h*k*0.25;}",
+    "float map(vec3 p){float d=1e5;for(int i=0;i<LMAX;i++){if(i>=ln)break;vec4 s=ls[i];d=smin(d,length(p-s.xyz)-s.w,uK);}return d;}",
+    "vec4 mapColor(vec3 p){float d=1e5;vec4 c=lc[0];for(int i=0;i<LMAX;i++){if(i>=ln)break;vec4 s=ls[i];float di=length(p-s.xyz)-s.w;",
+    " float w=uKc>1e-5?clamp(0.5+0.5*(d-di)/uKc,0.0,1.0):step(di,d);c=mix(c,lc[i],w);d=smin(d,di,uK);}return c;}",
+    "vec3 toSrgb(vec4 c){vec2 ab=c.yz;float m=length(ab);if(m>1e-5)ab*=mix(1.0,c.w/m,smoothstep(0.05,0.35,m/max(c.w,1e-5)));",
+    " float l_=c.x+0.3963377774*ab.x+0.2158037573*ab.y;float m_=c.x-0.1055613458*ab.x-0.0638541728*ab.y;float s_=c.x-0.0894841775*ab.x-1.2914855480*ab.y;",
+    " vec3 q=vec3(l_*l_*l_,m_*m_*m_,s_*s_*s_);",
+    " vec3 lin=clamp(vec3(4.0767416621*q.x-3.3077115913*q.y+0.2309699292*q.z,-1.2684380046*q.x+2.6097574011*q.y-0.3413193965*q.z,-0.0041960863*q.x-0.7034186147*q.y+1.7076147010*q.z),0.0,1.0);",
+    " return mix(lin*12.92,1.055*pow(lin,vec3(1.0/2.4))-0.055,step(0.0031308,lin));}",
+    "vec3 calcNormal(vec3 p){const vec2 e=vec2(1.0,-1.0)*0.0012;return normalize(e.xyy*map(p+e.xyy)+e.yyx*map(p+e.yyx)+e.yxy*map(p+e.yxy)+e.xxx*map(p+e.xxx));}",
+    "vec4 env(vec3 r){vec3 c=mix(uEnv*0.75,uEnv,smoothstep(-0.7,0.7,r.y));c=mix(uEnv*0.62,c,smoothstep(-0.55,0.05,r.y));",
+    " float ang=atan(r.y,r.z);float band=smoothstep(1.66,1.82,ang)*(1.0-smoothstep(2.30,2.34,ang));",
+    " float wx=1.0-smoothstep(uWinW-0.025,uWinW,abs(r.x));float win=band*wx;vec3 hiLow=uHi*vec3(0.8,0.86,0.9);",
+    " vec3 h=mix(hiLow,uHi,smoothstep(1.70,2.15,ang));return vec4(mix(c,h,win),win);}",
+    "void main(){vec2 uv=(gl_FragCoord.xy-0.5*uRes)/(0.5*uRes.y);uv-=uCam.xy;uv=vec2(uv.x*uCam.z-uv.y*uCam.w,uv.x*uCam.w+uv.y*uCam.z);",
+    " float camD=1.0/max(uFov,1e-3);vec3 ro=vec3(0.0,0.0,camD);vec3 rd=normalize(vec3(uv*uFov,-1.0));vec3 col=uBg;",
+    " ln=0;float t=1e5;float tEnd=-1e5;",
+    " for(int i=0;i<MAX_SPHERES;i++){if(i>=uCount)break;vec4 s=uS[i];vec3 oc=ro-s.xyz;float b=dot(oc,rd);float R=s.w+uMargin;float disc=b*b-dot(oc,oc)+R*R;",
+    "  if(disc>0.0){float sq=sqrt(disc);t=min(t,-b-sq);tEnd=max(tEnd,-b+sq);ls[ln]=s;lc[ln]=uC[i];ln++;if(ln==LMAX)break;}}",
+    " if(ln>0){t=max(t,0.0);float dmin=1e5;float tmin=t;bool hit=false;",
+    "  for(int i=0;i<72;i++){vec3 p=ro+rd*t;float d=map(p);if(d<dmin){dmin=d;tmin=t;}if(d<0.0006*t){hit=true;break;}t+=d;if(t>tEnd)break;}",
+    "  if(hit){vec3 p=ro+rd*t;vec3 n=calcNormal(p);vec3 base=toSrgb(mapColor(p));vec3 deep=base*uDeepF;vec3 rim=min(base*uRimF,vec3(1.0));",
+    "   vec3 shadow=mix(uShadow,base*0.55,0.6);float ndv=clamp(dot(n,-rd),0.0,1.0);float fres=pow(1.0-ndv,3.0);",
+    "   vec3 L=normalize(vec3(-0.45,0.75,0.6));float dif=clamp((dot(n,L)+0.5)/1.5,0.0,1.0);",
+    "   float occ=0.0;float w=1.0;for(int j=1;j<=4;j++){float h=0.018*float(j);occ+=(h-map(p+n*h))*w;w*=0.65;}occ=clamp(1.0-uAO*occ*16.0,0.0,1.0);",
+    "   vec3 body=mix(deep,base,dif*dif);body+=base*0.18*pow(1.0-ndv,1.5);body=mix(shadow,body,occ);",
+    "   vec3 r=reflect(rd,n);vec4 e=env(r);float refl=uRefl*(0.1+0.4*fres)*occ;col=mix(body,e.rgb,refl*(1.0-e.a));",
+    "   float side=clamp(0.65+0.5*dot(n.xy,normalize(vec2(-0.7,-0.5))),0.0,1.2);col+=rim*fres*uRimAmt*side*mix(0.4,1.0,occ);",
+    "   col=mix(col,e.rgb,e.a*uSpec*smoothstep(0.15,0.7,occ));",
+    "   vec3 Lo=normalize(vec3(-0.6,-0.4,0.7));float fl=pow(max(dot(r,Lo),0.0),900.0);col+=uFleck*fl*0.8*occ;",
+    "  }else{vec3 rim=min(toSrgb(mapColor(ro+rd*tmin))*uRimF,vec3(1.0));float pix=2.0*uFov*max(tmin,1e-3)/max(uRes.y,1.0);",
+    "   float edge=1.0-smoothstep(0.0,pix*1.2,max(dmin,0.0));float glow=uGlowAmt*exp(-max(dmin,0.0)/max(uGlow,1e-4));",
+    "   col=mix(uBg,rim,glow*0.35);col=mix(col,rim*0.95,edge*0.7);}}",
+    " vec2 q=gl_FragCoord.xy/max(uRes,vec2(1.0))-0.5;float vig=smoothstep(0.25,0.85,length(q));col*=1.0-uVig*vig;",
+    " outColor=vec4(clamp(col,0.0,1.0),1.0);}"
+  ].join("\n");
+
+  function hex(h) { var n = parseInt(h.slice(1), 16); return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255]; }
+  function lin(v) { return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }
+  function toLab(rgb) {
+    var r = lin(rgb[0]), g = lin(rgb[1]), b = lin(rgb[2]);
+    var l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+    var m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+    var s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+    var A = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s;
+    var B = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s;
+    return [0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s, A, B, Math.hypot(A, B)];
+  }
+  function mulberry32(a) {
+    return function () { a |= 0; a = (a + 0x6d2b79f5) | 0; var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+  var NOMINAL_R = [0.178, 0.115, 0.072, 0.034];
+  function buildSpheres(seed) {
+    var rnd = mulberry32(seed * 9973 + 17), out = [], i, j, k;
+    for (i = 0; i < MAX; i++) {
+      var x, y; do { x = rnd() * 2 - 1; y = rnd() * 2 - 1; } while (x * x + y * y > 1);
+      var z = rnd() * 2 - 1, u = rnd(), cls = u < 0.17 ? 0 : u < 0.52 ? 1 : u < 0.83 ? 2 : 3, ph = [], fr = [];
+      for (k = 0; k < 6; k++) { ph.push(rnd() * Math.PI * 2); fr.push(Math.PI * 2 * (k % 2 === 0 ? 0.12 + rnd() * 0.26 : 0.2 + rnd() * 0.3)); }
+      out.push({ hx: x, hy: y, hz: z, cls: cls, jit: 0.88 + rnd() * 0.24, ph: ph, fr: fr, bp: (rnd() - 0.5) * 1.6 });
+    }
+    var E = [0.85, 0.45, 0.35];
+    for (var it = 0; it < 30; it++) {
+      for (i = 0; i < out.length; i++) for (j = i + 1; j < out.length; j++) {
+        var a = out[i], b = out[j], dx = (a.hx - b.hx) * E[0], dy = (a.hy - b.hy) * E[1], dz = (a.hz - b.hz) * E[2];
+        var d = Math.sqrt(dx * dx + dy * dy + dz * dz) || 1e-4, want = (NOMINAL_R[a.cls] * a.jit + NOMINAL_R[b.cls] * b.jit) * 0.8;
+        if (d < want) { var p = ((want - d) / d) * 0.5;
+          a.hx += dx * p / E[0]; a.hy += dy * p / E[1]; a.hz += dz * p / E[2]; b.hx -= dx * p / E[0]; b.hy -= dy * p / E[1]; b.hz -= dz * p / E[2]; }
+      }
+      out.forEach(function (s) { var r = Math.sqrt(s.hx * s.hx + s.hy * s.hy); if (r > 1) { s.hx /= r; s.hy /= r; } s.hz = Math.max(-1, Math.min(1, s.hz)); });
+    }
+    return out;
+  }
+
+  function staticFallback(root) {
+    /* Nekustīgs raksts bez WebGL2 */
+    var c = CFG.colors, html = "", rnd = mulberry32(11);
+    for (var i = 0; i < 26; i++) {
+      var s = 30 + rnd() * 150, x = 52 + rnd() * 44, y = 8 + rnd() * 80;
+      html += '<span style="position:absolute;left:' + x + '%;top:' + y + '%;width:' + s + 'px;height:' + s + 'px;border-radius:50%;' +
+        'background:radial-gradient(circle at 35% 30%,#fff 0,' + c[i % c.length] + ' 45%,' + c[(i + 2) % c.length] + ' 100%);opacity:.85"></span>';
+    }
+    root.insertAdjacentHTML("beforeend", '<div aria-hidden="true" style="position:absolute;inset:0;overflow:hidden">' + html + "</div>");
+  }
+
+  window.CandyShoal = function (root) {
+    var canvas = document.createElement("canvas");
+    canvas.setAttribute("aria-hidden", "true");
+    canvas.style.cssText = "position:absolute;inset:0;width:100%;height:100%;display:block";
+    root.style.background = CFG.background;
+    root.appendChild(canvas);
+    var gl = canvas.getContext("webgl2", { alpha: false, antialias: false, depth: false, stencil: false, powerPreference: "low-power" });
+    var api = { pause: function () {}, resume: function () {}, ok: false };
+    if (!gl) { canvas.remove(); staticFallback(root); return api; }
+    function sh(type, src) { var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { console.warn(gl.getShaderInfoLog(s)); return null; } return s; }
+    var vs = sh(gl.VERTEX_SHADER, VERT), fs = sh(gl.FRAGMENT_SHADER, FRAG), prog = gl.createProgram();
+    if (!vs || !fs) { canvas.remove(); staticFallback(root); return api; }
+    gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { canvas.remove(); staticFallback(root); return api; }
+    gl.bindVertexArray(gl.createVertexArray()); gl.useProgram(prog);
+    var U = {};
+    "uRes uS uC uCount uK uKc uMargin uCam uFov uDeepF uRimF uShadow uHi uEnv uBg uFleck uSpec uRimAmt uGlow uGlowAmt uAO uRefl uWinW uVig"
+      .split(" ").forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
+    var soft = false;
+    try { var dbg = gl.getExtension("WEBGL_debug_renderer_info");
+      soft = /swiftshader|llvmpipe|software|basic render/i.test(String(gl.getParameter(dbg ? dbg.UNMASKED_RENDERER_WEBGL : gl.RENDERER))); } catch (e) {}
+
+    var a = CFG, spheres = buildSpheres(a.seed), n = a.count, s = a.scale / 100;
+    var paint = new Float32Array(MAX * 4), stops = a.colors.map(function (c) { return toLab(hex(c)); });
+    for (var i = 0; i < MAX; i++) paint.set(stops[i % stops.length], i * 4);
+    var k = (a.merge / 100) * 0.2 * s, glow = a.glowSize / 400;
+    function v3(u, h) { var c = hex(h); gl.uniform3f(u, c[0], c[1], c[2]); }
+    gl.uniform4fv(U.uC, paint); gl.uniform1i(U.uCount, n); gl.uniform1f(U.uK, k); gl.uniform1f(U.uKc, k * a.mixSpread / 100);
+    gl.uniform1f(U.uMargin, k + glow * 6 + 0.02); gl.uniform1f(U.uFov, Math.tan((a.fov / 2) * Math.PI / 180));
+    gl.uniform1f(U.uDeepF, a.deep / 100); gl.uniform1f(U.uRimF, a.rimLift / 100);
+    v3(U.uShadow, a.shadowColor); v3(U.uHi, a.highlight); v3(U.uEnv, a.envColor); v3(U.uBg, a.background); v3(U.uFleck, a.fleckColor);
+    gl.uniform1f(U.uSpec, a.specStrength / 100); gl.uniform1f(U.uRimAmt, a.rimStrength / 100); gl.uniform1f(U.uGlow, glow);
+    gl.uniform1f(U.uGlowAmt, a.glowStrength / 100); gl.uniform1f(U.uAO, a.occlusion / 100); gl.uniform1f(U.uRefl, a.reflection / 100);
+    gl.uniform1f(U.uWinW, a.windowWidth / 100); gl.uniform1f(U.uVig, a.vignette / 100);
+
+    var pos = new Float32Array(MAX * 4), home = new Float32Array(MAX * 2), spring = new Float32Array(MAX * 4), target = new Float32Array(MAX * 2);
+    var W = 1600, H = 900, time = 0, acc = 0, lastNow = 0, lastDraw = -1e9, running = true, onScreen = true, pageVisible = true;
+    var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var pointer = { u: 0.5, v: 0.5, inside: false, down: false };
+
+    function size() {
+      var r = root.getBoundingClientRect(); W = Math.max(1, r.width); H = Math.max(1, r.height);
+      var dev = Math.min(window.devicePixelRatio || 1, 2), res = a.resolution / 100, cw = W * dev * res, ch = H * dev * res;
+      var maxPx = soft ? 160000 : 700000; if (cw * ch > maxPx) { var q = Math.sqrt(maxPx / (cw * ch)); cw *= q; ch *= q; }
+      cw = Math.round(cw); ch = Math.round(ch);
+      if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; gl.viewport(0, 0, cw, ch); }
+    }
+    function step(dt) {
+      var rate = reduced ? 0 : a.speed / 50; time += dt * rate; var t = time;
+      var aspect = W / H, shiftX = (a.placeX / 100) * 2 * aspect, shiftY = -(a.offsetY / 100) * 2;
+      var px = (pointer.u - 0.5) * 2 * aspect - shiftX, py = (0.5 - pointer.v) * 2 - shiftY;
+      var halfX = (a.fieldWidth / 100) * aspect, halfY = a.fieldHeight / 100, halfZ = a.depth / 100, wander = (a.wander / 100) * 2;
+      var breathT = a.breathMs / 1000, squeeze = (a.clump / 100) * 0.4, wob = 0.6 * Math.sin(t * 0.53);
+      var hv = reduced ? 0 : a.hover / 50, g = reduced ? 0 : a.gather / 10, gathering = pointer.inside && pointer.down && g > 0;
+      var pR = (a.pointerRadius / 100) * 2, gR = pR * 1.8;
+      var push = pointer.inside && !gathering ? (a.pointerPush / 100) * 2 * hv : 0, pull = gathering ? Math.min(0.95, g * 1.6) : 0;
+      for (var i = 0; i < n; i++) {
+        var sp = spheres[i], b = 0.5 + 0.5 * Math.cos((Math.PI * 2 * t) / breathT + sp.bp + wob), sq = 1 - squeeze * b;
+        var wx = wander * (0.62 * Math.sin(sp.fr[0] * t + sp.ph[0]) + 0.38 * Math.sin(sp.fr[1] * t + sp.ph[1]));
+        var wy = wander * (0.62 * Math.sin(sp.fr[2] * t + sp.ph[2]) + 0.38 * Math.sin(sp.fr[3] * t + sp.ph[3]));
+        var wz = wander * 0.8 * (0.62 * Math.sin(sp.fr[4] * t + sp.ph[4]) + 0.38 * Math.sin(sp.fr[5] * t + sp.ph[5]));
+        var x = (sp.hx * halfX + wx) * sq * s, y = (sp.hy * halfY + wy) * sq * s, z = (sp.hz * halfZ + wz) * sq * s;
+        home[i * 2] = x; home[i * 2 + 1] = y; pos[i * 4 + 2] = z; pos[i * 4 + 3] = (a.sizes[sp.cls] / 800) * sp.jit * s;
+        var tx = 0, ty = 0;
+        if (push > 0 || pull > 0) { var dx = x - px, dy = y - py, d2 = dx * dx + dy * dy;
+          if (pull > 0) { var kk = pull * Math.exp(-d2 / (gR * gR)); tx = -dx * kk; ty = -dy * kk; }
+          else { var d = Math.sqrt(d2) || 1e-4, kp = push * Math.exp(-d2 / (pR * pR)); tx = dx / d * kp; ty = dy / d * kp; } }
+        target[i * 2] = tx; target[i * 2 + 1] = ty;
+      }
+      acc = Math.min(acc + dt, SUBSTEP * 8);
+      while (acc >= SUBSTEP) { acc -= SUBSTEP;
+        for (i = 0; i < n; i++) for (var c = 0; c < 2; c++) { var j = i * 4;
+          var v = spring[j + 2 + c] + (SPRING_K * (target[i * 2 + c] - spring[j + c]) - SPRING_C * spring[j + 2 + c]) * SUBSTEP;
+          spring[j + 2 + c] = v; spring[j + c] += v * SUBSTEP; } }
+      for (i = 0; i < n; i++) { pos[i * 4] = home[i * 2] + spring[i * 4]; pos[i * 4 + 1] = home[i * 2 + 1] + spring[i * 4 + 1]; }
+    }
+    function draw() {
+      gl.uniform2f(U.uRes, canvas.width, canvas.height); gl.uniform4fv(U.uS, pos, 0, n * 4);
+      gl.uniform4f(U.uCam, (a.placeX / 100) * 2 * (W / H), -(a.offsetY / 100) * 2, 1, 0);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+    var raf = 0;
+    function loop(now) {
+      raf = requestAnimationFrame(loop);
+      if (!running || !onScreen || !pageVisible) { lastNow = 0; return; }
+      if (now - lastDraw < 1000 / a.fps - 2) return;
+      var ms = lastNow ? now - lastNow : 0; lastNow = now; lastDraw = now;
+      step(Math.min(ms / 1000, 0.1)); size(); draw();
+    }
+    root.addEventListener("pointermove", function (e) { var r = root.getBoundingClientRect(); pointer.u = (e.clientX - r.left) / r.width; pointer.v = (e.clientY - r.top) / r.height; pointer.inside = true; }, { passive: true });
+    root.addEventListener("pointerleave", function () { pointer.inside = false; pointer.down = false; }, { passive: true });
+    root.addEventListener("pointerdown", function () { pointer.down = true; }, { passive: true });
+    window.addEventListener("pointerup", function (e) { pointer.down = false; if (e.pointerType === "touch") pointer.inside = false; }, { passive: true });
+    if (window.IntersectionObserver) new IntersectionObserver(function (en) { onScreen = en.some(function (x) { return x.isIntersecting; }); }).observe(root);
+    document.addEventListener("visibilitychange", function () { pageVisible = document.visibilityState !== "hidden"; });
+    canvas.addEventListener("webglcontextlost", function (e) { e.preventDefault(); cancelAnimationFrame(raf); });
+    step(0); size(); draw();
+    raf = requestAnimationFrame(loop);
+    api.ok = true;
+    api.pause = function () { running = false; };
+    api.resume = function () { running = true; lastNow = 0; };
+    return api;
+  };
+})();
+
+
+</script>
+<script>
+/* Kopīgās funkcijas: mērogošana, pilnekrāns, ekrāni */
+(function () {
+  "use strict";
+  var stage = document.getElementById("stage");
+  function fit() {
+    var k = Math.min(window.innerWidth / 1600, window.innerHeight / 900);
+    stage.style.transform = "scale(" + k + ")";
+  }
+  window.addEventListener("resize", fit); fit();
+
+  var fsBtn = document.getElementById("fsBtn");
+  function fsEl() { return document.fullscreenElement || document.webkitFullscreenElement; }
+  function fsTxt() { fsBtn.textContent = fsEl() ? "Iziet no pilnekrāna režīma" : "Atvērt pilnekrāna režīmu"; }
+  fsBtn.addEventListener("click", function () {
+    var d = document.documentElement;
+    if (fsEl()) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); }
+    else if (d.requestFullscreen) { d.requestFullscreen().catch(function () {}); }
+    else if (d.webkitRequestFullscreen) { d.webkitRequestFullscreen(); }
+  });
+  document.addEventListener("fullscreenchange", fsTxt);
+  document.addEventListener("webkitfullscreenchange", fsTxt);
+  fsTxt();
+
+  var fx = window.CandyShoal(document.querySelector("#start .bgfx"));
+
+  window.KIT = {
+    show: function (id) {
+      document.querySelectorAll(".screen").forEach(function (s) { s.classList.toggle("on", s.id === id); });
+      if (id === "start") fx.resume(); else fx.pause();
+    },
+    shuffle: function (arr) {
+      var a = arr.slice();
+      for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+      return a;
+    },
+    el: function (html) { var d = document.createElement("div"); d.innerHTML = html.trim(); return d.firstChild; },
+    esc: function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  };
+  document.querySelectorAll("[data-uz-sakumu]").forEach(function (b) { b.addEventListener("click", function () { KIT.show("start"); }); });
+})();
+
+
+</script>
+<script>
+
+/* 1. rīks «Prasmes kāpnes» – soļu kārtošana pie tāfeles */
+(function () {
+  "use strict";
+  /* Pakāpienu nosaukumi (vienādi visām prasmēm) */
+  var MODELIS = ["Gribu iemācīties", "Vēroju un jautāju", "Mēģinu pirmo reizi", "Kļūdos un laboju", "Vingrinos atkal un atkal", "Protu un varu iemācīt citam"];
+  /* Prasmes. Soļi rakstīti pareizajā secībā – rīks tos sajauc pats. */
+  var PRASMES = [
+    { n: "Rakstīt ar desmit pirkstiem", p: "Datorika", prof: "sekretāri, žurnālisti, programmētāji, klientu apkalpošanas speciālisti", s: [
+      "Gribu rakstīt datorā ātrāk un tā, lai nav jāskatās uz tastatūru.",
+      "Apskatu pirkstu shēmu un pajautāju, kurš pirksts spiež kuru taustiņu.",
+      "Pirmo reizi lēnām uzrakstu teikumu ar visiem desmit pirkstiem.",
+      "Bieži nospiežu nepareizu taustiņu, tāpēc pārbaudu, kur ir pirksti.",
+      "Katru dienu desmit minūtes vingrinos, līdz rakstu bez kļūdām.",
+      "Rakstu ātri un parādu kādam citam, kā novietot pirkstus."] },
+    { n: "Izcept cepumus pēc receptes", p: "Dizains un tehnoloģijas", prof: "pavāri, konditori, maiznieki, ēdināšanas uzņēmumu vadītāji", s: [
+      "Gribu ģimenes svētkiem izcept cepumus.",
+      "Vēroju, kā pieaugušais cep cepumus, un pajautāju, kad tie ir gatavi.",
+      "Pirmo reizi cepu, un kāds pieaugušais ir blakus.",
+      "Pirmās plāts cepumi piedeg, tāpēc nākamreiz samazinu temperatūru.",
+      "Cepu vēl vairākas reizes, un katru reizi izdodas labāk.",
+      "Cepu pats vai pati un iemācu recepti jaunākam bērnam."] },
+    { n: "Peldēt", p: "Sports", prof: "glābēji, peldēšanas treneri, ūdenslīdēji, jūrnieki", s: [
+      "Gribu vasarā droši peldēt kopā ar draugiem.",
+      "Treneris parāda kustības ūdenī, un es pajautāju, kā pareizi elpot.",
+      "Pirmo reizi peldu baseinā ar peldēšanas dēli.",
+      "Noriju ūdeni, un treneris palīdz izlabot elpošanu.",
+      "Divas reizes nedēļā trenējos, līdz varu nopeldēt visu baseina garumu.",
+      "Peldu droši un palīdzu jaunākam bērnam pārvarēt bailes no ūdens."] },
+    { n: "Uzstāties klases priekšā", p: "Valodas", prof: "skolotāji, gidi, aktieri, pasākumu vadītāji, juristi", s: [
+      "Gribu pārliecinoši pastāstīt klasei par savu vaļasprieku.",
+      "Vēroju labus stāstniekus un pajautāju, kā viņi gatavojas uzstāties.",
+      "Pirmo reizi stāstu klasei, un man nedaudz trīc balss.",
+      "Aizmirstu, ko gribēju teikt, tāpēc sagatavoju kartītes ar atgādnēm.",
+      "Pirms nākamās uzstāšanās vairākas reizes vingrinos runāt ģimenes priekšā.",
+      "Uzstājos mierīgi un dodu citiem padomus, kā mazāk uztraukties."] },
+    { n: "Uzzīmēt dzīvnieku pēc dabas", p: "Vizuālā māksla", prof: "ilustratori, animatori, grafikas dizaineri, zoologi", s: [
+      "Gribu uzzīmēt savu kaķi tā, lai to varētu atpazīt.",
+      "Apskatu, kā mākslinieki zīmē dzīvniekus, un pajautāju, ar ko sākt.",
+      "Pirmo reizi zīmēju kaķi no apļiem un ovāliem.",
+      "Kājas iznāk par garām, tāpēc salīdzinu zīmējumu ar īsto kaķi.",
+      "Katru vakaru zīmēju kaķi citā pozā.",
+      "Zīmēju ātri un parādu kādam citam, kā sākt ar vienkāršām formām."] },
+    { n: "Spēlēt ģitāru", p: "Mūzika", prof: "mūziķi, mūzikas skolotāji, skaņu režisori, mūzikas instrumentu meistari", s: [
+      "Gribu nospēlēt savu mīļāko dziesmu.",
+      "Skolotājs parāda pirmos akordus, un es pajautāju, kā turēt ģitāru.",
+      "Pirmo reizi mēģinu nospēlēt divus akordus.",
+      "Akords skan neskaidri, tāpēc stingrāk piespiežu stīgas.",
+      "Katru dienu spēlēju piecpadsmit minūtes, līdz varu ātri mainīt akordus.",
+      "Nospēlēju dziesmu un iemācu draugam pirmo akordu."] }
+  ];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var cur = 0, vieta = [], kaudze = [], parbaudits = false, atklats = false, gatavi = {};
+
+
+  function veidotKapnes() {
+    var k = $("kapnes");
+    k.querySelectorAll(".pak").forEach(function (e) { e.remove(); });
+    for (var i = 0; i < 6; i++) {
+      var d = document.createElement("div");
+      d.className = "pak";
+      d.style.left = (28 + i * 90) + "px"; d.style.top = (500 - i * 86) + "px";
+      d.innerHTML = '<div class="pamats"></div><button class="slots" type="button" data-i="' + i + '"><span class="nrs">' + (i + 1) + '</span><span class="tx"></span></button>';
+      k.appendChild(d);
+    }
+    k.querySelectorAll(".slots").forEach(function (b) { b.addEventListener("click", function () { atpakal(+b.dataset.i); }); });
+  }
+
+  function cipi() {
+    $("cipi").innerHTML = PRASMES.map(function (p, i) {
+      return '<button class="cips' + (i === cur ? " on" : "") + (gatavi[i] ? " gatavs" : "") + '" type="button" data-i="' + i + '">' + KIT.esc(p.n) + "</button>";
+    }).join("");
+    $("cipi").querySelectorAll(".cips").forEach(function (b) { b.addEventListener("click", function () { saktPrasmi(+b.dataset.i); }); });
+  }
+
+  function saktPrasmi(i) {
+    cur = i; parbaudits = false; atklats = false;
+    var p = PRASMES[i];
+    vieta = [null, null, null, null, null, null];
+    var idx = [0, 1, 2, 3, 4, 5], sj;
+    do { sj = KIT.shuffle(idx); } while (sj.join() === "0,1,2,3,4,5");
+    kaudze = sj;
+    $("pm").textContent = p.p; $("pn").textContent = p.n;
+    cipi(); radit();
+  }
+
+  function radit() {
+    var p = PRASMES[cur];
+    document.querySelectorAll(".slots").forEach(function (b, i) {
+      var s = vieta[i];
+      b.className = "slots" + (s !== null ? " piln" : "");
+      b.querySelector(".tx").innerHTML = (parbaudits ? '<span class="lb">' + MODELIS[i] + "</span>" : "") + (s !== null ? KIT.esc(p.s[s]) : "");
+      if (parbaudits) b.classList.add(s === i ? "pareizi" : "gandriz");
+    });
+    var pan = $("panelis"), h = "";
+    if (!parbaudits) {
+      h += "<h4>Soļu kartītes</h4>";
+      h += kaudze.length ? '<p class="ins">Pieskarieties kartītei – tā nostāsies uz zemākā brīvā pakāpiena. Pieskarieties pakāpienam, un kartīte atgriezīsies šeit.</p>'
+                         : '<p class="ins">Visi pakāpieni aizpildīti. Vai klase ir vienisprātis? Tad pārbaudiet!</p>';
+      h += '<div class="kaudze">' + kaudze.map(function (s) {
+        return '<button class="kart pop" type="button" data-s="' + s + '">' + KIT.esc(p.s[s]) + "</button>";
+      }).join("") + "</div>";
+      h += '<div class="pogas"><button class="btn pr liels" id="btnParb" type="button"' + (kaudze.length ? " disabled" : "") + '>Pārbaudīt</button></div>';
+    } else {
+      var pareizi = vieta.filter(function (s, i) { return s === i; }).length;
+      h += "<h4>" + (pareizi === 6 ? "Visi soļi savās vietās!" : "Pareizi " + pareizi + (pareizi === 1 ? " solis" : " soļi") + " no 6") + "</h4>";
+      if (atklats) h = '<h4>Pareizā secība</h4><div class="atg ok">Izlasiet soļus no apakšas uz augšu kopā ar pakāpienu nosaukumiem.</div>';
+      else h += pareizi === 6 ? '<div class="atg ok">Lieliski! Jūs atpazināt visus prasmes kāpņu pakāpienus.</div>'
+                        : pareizi >= 3 ? '<div class="atg gd">Gandrīz! Kartītes uz dzeltenajiem pakāpieniem vēl jāpārkārto. Paskatieties uz pakāpienu nosaukumiem – vai varat katrai kartītei atrast pareizo vietu?</div>'
+                        : '<div class="atg gd">Pamēģiniet vēlreiz! Salīdziniet kartītes ar pakāpienu nosaukumiem un padomājiet, ar ko sākas prasmes apguve un kas notiek tālāk.</div>';
+      h += '<div class="kb"><span class="v">KARJERAS IZGLĪTĪBA</span><p>Šo prasmi ikdienas darbā izmanto ' + KIT.esc(p.prof) + ". Arī viņi kādreiz kāpa pa tiem pašiem pakāpieniem.</p></div>";
+      h += '<div class="pogas">';
+      if (pareizi < 6) h += '<button class="btn liels" id="btnRadit" type="button">Rādīt pareizo secību</button>';
+      h += '<button class="btn pr liels" id="btnNak" type="button">' + (Object.keys(gatavi).length >= PRASMES.length ? "Uz kopsavilkumu" : "Nākamā prasme") + "</button></div>";
+    }
+    pan.innerHTML = h;
+    pan.querySelectorAll(".kart").forEach(function (b) { b.addEventListener("click", function () { novietot(+b.dataset.s); }); });
+    if ($("btnParb")) $("btnParb").addEventListener("click", parbaudit);
+    if ($("btnRadit")) $("btnRadit").addEventListener("click", function () { vieta = [0, 1, 2, 3, 4, 5]; atklats = true; radit(); });
+    if ($("btnNak")) $("btnNak").addEventListener("click", nakama);
+  }
+
+  function novietot(s) {
+    if (parbaudits) return;
+    var i = vieta.indexOf(null); if (i < 0) return;
+    vieta[i] = s; kaudze = kaudze.filter(function (x) { return x !== s; }); radit();
+  }
+  function atpakal(i) {
+    if (parbaudits || vieta[i] === null) return;
+    kaudze.push(vieta[i]); vieta[i] = null; radit();
+  }
+  function parbaudit() { parbaudits = true; gatavi[cur] = true; cipi(); radit(); }
+  function nakama() {
+    for (var k = 1; k <= PRASMES.length; k++) { var j = (cur + k) % PRASMES.length; if (!gatavi[j]) { saktPrasmi(j); return; } }
+    beigas();
+  }
+  function beigas() {
+    $("modelis").innerHTML = MODELIS.map(function (m, i) {
+      return '<div class="mst" style="margin-bottom:' + i * 22 + 'px"><b>' + (i + 1) + "</b><span>" + m + "</span></div>";
+    }).join("");
+    KIT.show("beigas");
+  }
+  function sakt() { gatavi = {}; saktPrasmi(0); KIT.show("darbs"); }
+
+  veidotKapnes();
+  $("btnSakt").addEventListener("click", sakt);
+  $("btnVelreiz").addEventListener("click", sakt);
+  $("btnBeigas").addEventListener("click", beigas);
+})();
+
+</script>
+</body>
+</html>
